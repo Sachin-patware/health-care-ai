@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '../theme/colors';
-// import VoiceHealthAssistant from '../components/voice-health-assistance';
+import VoiceHealthAssistant from '../components/voice-health-assistance';
 
 export default function ConsultScreen() {
   return (
@@ -10,7 +10,7 @@ export default function ConsultScreen() {
         <Text style={styles.title}>Consult</Text>
         <Text style={styles.subtitle}>Symptom checker, camera diagnosis, and voice assistant.</Text>
         <View style={{ marginTop: 16 }}>
-          {/* <VoiceHealthAssistant /> */}
+          <VoiceHealthAssistant />
         </View>
       </ScrollView>
     </View>

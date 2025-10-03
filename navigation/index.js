@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { AuthProvider } from './auth';
+import { AuthProvider, useAuth } from './auth';
 import LoginScreen from '../screens/LoginScreen';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -66,46 +66,46 @@ function AppTabs() {
   );
 }
 
-export default function RootNavigation() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+function InnerNavigator() {
+  const { isAuthenticated } = useAuth();
   const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
   const [bootStage, setBootStage] = useState('splash'); // 'splash' | 'onboarding' | 'ready'
 
-  const auth = useMemo(() => ({
-    isAuthenticated,
-    login: () => setIsAuthenticated(true),
-    logout: () => setIsAuthenticated(false)
-  }), [isAuthenticated]);
+  return (
+    <NavigationContainer theme={navTheme}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {bootStage === 'splash' && (
+          <Stack.Screen name="Splash" children={() => (
+            <SplashScreen onDone={() => setBootStage('onboarding')} />
+          )} />
+        )}
+        {bootStage === 'onboarding' && (
+          <Stack.Screen name="Onboarding" children={() => (
+            <OnboardingScreen onDone={() => setBootStage('ready')} />
+          )} />
+        )}
+        {bootStage === 'ready' && (
+          isAuthenticated ? (
+            <Stack.Screen name="Main" children={() => (
+              <>
+                <AppTabs />
+                <EmergencyFAB onPress={() => setIsEmergencyOpen(true)} />
+                <EmergencyModal visible={isEmergencyOpen} onClose={() => setIsEmergencyOpen(false)} />
+              </>
+            )} />
+          ) : (
+            <Stack.Screen name="Login" component={LoginScreen} />
+          )
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
+export default function RootNavigation() {
   return (
     <AuthProvider>
-      <NavigationContainer theme={navTheme}>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {bootStage === 'splash' && (
-            <Stack.Screen name="Splash" children={() => (
-              <SplashScreen onDone={() => setBootStage('onboarding')} />
-            )} />
-          )}
-          {bootStage === 'onboarding' && (
-            <Stack.Screen name="Onboarding" children={() => (
-              <OnboardingScreen onDone={() => setBootStage('ready')} />
-            )} />
-          )}
-          {bootStage === 'ready' && (
-            isAuthenticated ? (
-              <Stack.Screen name="Main" children={() => (
-                <>
-                  <AppTabs />
-                  <EmergencyFAB onPress={() => setIsEmergencyOpen(true)} />
-                  <EmergencyModal visible={isEmergencyOpen} onClose={() => setIsEmergencyOpen(false)} />
-                </>
-              )} />
-            ) : (
-              <Stack.Screen name="Login" component={LoginScreen} />
-            )
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
+      <InnerNavigator />
     </AuthProvider>
   );
 }

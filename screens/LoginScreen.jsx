@@ -13,6 +13,8 @@ export default function LoginScreen() {
   const [identifier, setIdentifier] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
+  const [expectedOtp, setExpectedOtp] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
@@ -37,12 +39,27 @@ export default function LoginScreen() {
 
   const sendOtp = async () => {
     setLoading(true);
-    setTimeout(() => { setOtpSent(true); setLoading(false); }, 800);
+    setErrorMsg('');
+    // Generate a 6-digit demo OTP and "send"
+    const generated = String(Math.floor(100000 + Math.random() * 900000));
+    setExpectedOtp(generated);
+    setTimeout(() => {
+      setOtpSent(true);
+      setLoading(false);
+    }, 600);
   };
 
   const verifyOtp = async () => {
     setLoading(true);
-    setTimeout(() => { setLoading(false); login(); }, 800);
+    setErrorMsg('');
+    setTimeout(() => {
+      setLoading(false);
+      if (otp && expectedOtp && otp.trim() === expectedOtp) {
+        login();
+      } else {
+        setErrorMsg('Invalid OTP. Please try again or resend.');
+      }
+    }, 400);
   };
 
   return (
@@ -90,7 +107,11 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </>
       )}
-      <Text style={styles.helper}>OTP flow is simulated. API hooks to be added later.</Text>
+      {!!errorMsg && <Text style={[styles.helper, { color: colors.emergency }]}>{errorMsg}</Text>}
+      <Text style={styles.helper}>OTP flow is simulated. Enter the 6-digit code sent to your contact.</Text>
+      {otpSent && (
+        <Text style={[styles.helper, { marginTop: spacing.md }]}>Demo OTP for testing: {expectedOtp}</Text>
+      )}
     </View>
   );
 }
