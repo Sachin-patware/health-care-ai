@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { colors, shadows } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 // Emergency FAB is now global in navigation
+import { useNavigation } from '@react-navigation/native';
 
 const Card = ({ title, subtitle, color, onPress, icon }) => (
   <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={[styles.card, shadows.card]}>
@@ -17,6 +18,7 @@ const Card = ({ title, subtitle, color, onPress, icon }) => (
 );
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
@@ -24,12 +26,12 @@ export default function HomeScreen() {
         <Text style={styles.summary}>Your health at a glance</Text>
 
         <View style={styles.quickRow}>
-          <Card title="Symptom Check" subtitle="Describe issues" color={colors.accent} onPress={() => {}} />
-          <Card title="Camera" subtitle="Analyze photo" color={colors.primary} onPress={() => {}} />
+          <Card title="Symptom Check" subtitle="Describe issues" color={colors.accent} onPress={() => navigation.navigate('Consult')} />
+          <Card title="Camera" subtitle="Analyze photo" color={colors.primary} onPress={() => navigation.navigate('Consult')} />
         </View>
         <View style={styles.quickRow}>
-          <Card title="Emergency" subtitle="Send alert" color={colors.emergency} onPress={() => {}} />
-          <Card title="My Health" subtitle="Records & history" color={colors.success} onPress={() => {}} />
+          <Card title="Emergency" subtitle="Send alert" color={colors.emergency} onPress={() => navigation.navigate('Consult')} />
+          <Card title="My Health" subtitle="Records & history" color={colors.success} onPress={() => navigation.navigate('MyHealth')} />
         </View>
 
         <Text style={styles.sectionTitle}>Health Tips</Text>

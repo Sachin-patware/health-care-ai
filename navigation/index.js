@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthProvider } from './auth';
 import LoginScreen from '../screens/LoginScreen';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -31,11 +32,7 @@ const navTheme = {
   }
 };
 
-const AuthContext = createContext(null);
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+// Auth context moved to navigation/auth
 
 function AppTabs() {
   return (
@@ -81,7 +78,7 @@ export default function RootNavigation() {
   }), [isAuthenticated]);
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthProvider>
       <NavigationContainer theme={navTheme}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {bootStage === 'splash' && (
@@ -109,7 +106,7 @@ export default function RootNavigation() {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 

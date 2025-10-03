@@ -3,11 +3,9 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 import PrimaryButton from '../components/PrimaryButton';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
-import { useAuth } from '../navigation';
-import * as WebBrowser from 'expo-web-browser';
-import * as AuthSession from 'expo-auth-session';
+import { useAuth } from '../navigation/auth';
 
-WebBrowser.maybeCompleteAuthSession();
+// Optional in Expo Go; removing to avoid dependency on expo-web-browser
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -18,29 +16,24 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  const discovery = AuthSession.useAutoDiscovery('https://accounts.google.com');
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'healthcareai' });
-
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: (process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO || (global?.expo?.env?.googleClientIdExpo)) ?? 'YOUR_EXPO_CLIENT_ID.apps.googleusercontent.com',
-      androidClientId: (process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID || (global?.expo?.env?.googleClientIdAndroid)) ?? 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
-      iosClientId: (process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS || (global?.expo?.env?.googleClientIdIos)) ?? 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
-      redirectUri,
-      scopes: ['openid', 'profile', 'email'],
-      responseType: AuthSession.ResponseType.Token
-    },
-    discovery
-  );
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      login();
-    }
-    if (response?.type === 'error' || response?.type === 'dismiss') {
+  const handleGoogleLogin = async () => {
+    try {
+      setOauthLoading(true);
+      const AuthSession = await import('expo-auth-session');
+      const clientId = (process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO || (global?.expo?.env?.googleClientIdExpo)) ?? 'YOUR_EXPO_CLIENT_ID.apps.googleusercontent.com';
+      // For Expo Go on iOS/Android, prefer proxy redirect without custom scheme
+      const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent('openid profile email')}&prompt=select_account`;
+      const result = await AuthSession.startAsync({ authUrl, returnUrl: redirectUri });
+      if (result.type === 'success') {
+        login();
+      }
+    } catch (e) {
+      console.warn('Google login unavailable:', e?.message || e);
+    } finally {
       setOauthLoading(false);
     }
-  }, [response, login]);
+  };
 
   const sendOtp = async () => {
     setLoading(true);
@@ -75,7 +68,7 @@ export default function LoginScreen() {
             onChangeText={setIdentifier}
           />
           <PrimaryButton title={loading ? 'Sending...' : 'Send OTP'} onPress={sendOtp} disabled={!identifier || loading} />
-          <TouchableOpacity onPress={async () => { setOauthLoading(true); await promptAsync(); }} style={{ marginTop: spacing.lg }} disabled={!request || oauthLoading}>
+          <TouchableOpacity onPress={handleGoogleLogin} style={{ marginTop: spacing.lg }} disabled={oauthLoading}>
             <View style={{ backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ color: colors.text, fontWeight: '600' }}>{oauthLoading ? 'Connecting to Google...' : 'Continue with Google'}</Text>
             </View>
