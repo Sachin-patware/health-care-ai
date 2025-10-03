@@ -20,10 +20,21 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.healthcareai"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "scheme": "healthcareai",
+    "extra": {
+      "googleClientIdExpo": "YOUR_EXPO_CLIENT_ID.apps.googleusercontent.com",
+      "googleClientIdAndroid": "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
+      "googleClientIdIos": "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com"
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-sqlite"
+    ]
   }
 }
